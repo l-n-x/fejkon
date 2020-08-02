@@ -50,6 +50,18 @@ set_instance_parameter_value mgmt_clk {clockFrequency} {50000000.0}
 set_instance_parameter_value mgmt_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value mgmt_clk {resetSynchronousEdges} {DEASSERT}
 
+add_instance mm altera_avalon_mm_clock_crossing_bridge 20.1
+set_instance_parameter_value mm {ADDRESS_UNITS} {SYMBOLS}
+set_instance_parameter_value mm {ADDRESS_WIDTH} {10}
+set_instance_parameter_value mm {COMMAND_FIFO_DEPTH} {4}
+set_instance_parameter_value mm {DATA_WIDTH} {32}
+set_instance_parameter_value mm {MASTER_SYNC_DEPTH} {2}
+set_instance_parameter_value mm {MAX_BURST_SIZE} {1}
+set_instance_parameter_value mm {RESPONSE_FIFO_DEPTH} {4}
+set_instance_parameter_value mm {SLAVE_SYNC_DEPTH} {2}
+set_instance_parameter_value mm {SYMBOL_WIDTH} {8}
+set_instance_parameter_value mm {USE_AUTO_ADDRESS_WIDTH} {0}
+
 add_instance phy0_clk clock_source 20.1
 set_instance_parameter_value phy0_clk {clockFrequency} {106255000.0}
 set_instance_parameter_value phy0_clk {clockFrequencyKnown} {1}
@@ -114,20 +126,14 @@ add_interface clk clock sink
 set_interface_property clk EXPORT_OF mgmt_clk.clk_in
 add_interface framer0_active conduit end
 set_interface_property framer0_active EXPORT_OF framer0.active
-add_interface framer0_rx_mgmt_mm avalon slave
-set_interface_property framer0_rx_mgmt_mm EXPORT_OF framer0.rx_mgmt_mm
-add_interface framer0_tx_mgmt_mm avalon slave
-set_interface_property framer0_tx_mgmt_mm EXPORT_OF framer0.tx_mgmt_mm
 add_interface framer1_active conduit end
 set_interface_property framer1_active EXPORT_OF framer1.active
-add_interface framer1_rx_mgmt_mm avalon slave
-set_interface_property framer1_rx_mgmt_mm EXPORT_OF framer1.rx_mgmt_mm
-add_interface framer1_tx_mgmt_mm avalon slave
-set_interface_property framer1_tx_mgmt_mm EXPORT_OF framer1.tx_mgmt_mm
 add_interface framera_active conduit end
 set_interface_property framera_active EXPORT_OF framerA.active
 add_interface framerb_active conduit end
 set_interface_property framerb_active EXPORT_OF framerB.active
+add_interface mm avalon slave
+set_interface_property mm EXPORT_OF mm.s0
 add_interface phy0_clk clock sink
 set_interface_property phy0_clk EXPORT_OF phy0_clk.clk_in
 add_interface phy0_reset reset sink
@@ -192,9 +198,17 @@ add_connection framer0.avtx xcvr0.avtx
 
 add_connection framer1.avtx xcvr1.avtx
 
+add_connection framerA.avtx xcvrA.avtx
+
 add_connection framerA.userrx AtoB.in
 
+add_connection framerB.avtx xcvrB.avtx
+
 add_connection framerB.userrx BtoA.in
+
+add_connection mgmt_clk.clk mm.m0_clk
+
+add_connection mgmt_clk.clk mm.s0_clk
 
 add_connection mgmt_clk.clk reconfig.mgmt_clk_clk
 
@@ -222,6 +236,10 @@ add_connection mgmt_clk.clk_reset framerA.reset
 
 add_connection mgmt_clk.clk_reset framerB.reset
 
+add_connection mgmt_clk.clk_reset mm.m0_reset
+
+add_connection mgmt_clk.clk_reset mm.s0_reset
+
 add_connection mgmt_clk.clk_reset reconfig.mgmt_rst_reset
 
 add_connection mgmt_clk.clk_reset xcvr0.reset
@@ -231,6 +249,46 @@ add_connection mgmt_clk.clk_reset xcvr1.reset
 add_connection mgmt_clk.clk_reset xcvrA.reset
 
 add_connection mgmt_clk.clk_reset xcvrB.reset
+
+add_connection mm.m0 framer0.rx_mgmt_mm
+set_connection_parameter_value mm.m0/framer0.rx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framer0.rx_mgmt_mm baseAddress {0x0000}
+set_connection_parameter_value mm.m0/framer0.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 framer0.tx_mgmt_mm
+set_connection_parameter_value mm.m0/framer0.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framer0.tx_mgmt_mm baseAddress {0x0020}
+set_connection_parameter_value mm.m0/framer0.tx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 framer1.rx_mgmt_mm
+set_connection_parameter_value mm.m0/framer1.rx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framer1.rx_mgmt_mm baseAddress {0x00c0}
+set_connection_parameter_value mm.m0/framer1.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 framer1.tx_mgmt_mm
+set_connection_parameter_value mm.m0/framer1.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framer1.tx_mgmt_mm baseAddress {0x00e0}
+set_connection_parameter_value mm.m0/framer1.tx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 framerA.rx_mgmt_mm
+set_connection_parameter_value mm.m0/framerA.rx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framerA.rx_mgmt_mm baseAddress {0x0040}
+set_connection_parameter_value mm.m0/framerA.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 framerA.tx_mgmt_mm
+set_connection_parameter_value mm.m0/framerA.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framerA.tx_mgmt_mm baseAddress {0x0060}
+set_connection_parameter_value mm.m0/framerA.tx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 framerB.rx_mgmt_mm
+set_connection_parameter_value mm.m0/framerB.rx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framerB.rx_mgmt_mm baseAddress {0x0080}
+set_connection_parameter_value mm.m0/framerB.rx_mgmt_mm defaultConnection {0}
+
+add_connection mm.m0 framerB.tx_mgmt_mm
+set_connection_parameter_value mm.m0/framerB.tx_mgmt_mm arbitrationPriority {1}
+set_connection_parameter_value mm.m0/framerB.tx_mgmt_mm baseAddress {0x00a0}
+set_connection_parameter_value mm.m0/framerB.tx_mgmt_mm defaultConnection {0}
 
 add_connection phy0_clk.clk xcvr0.phy_clk
 
@@ -323,6 +381,8 @@ add_connection xcvr1.tx_clk framer1.tx_clk
 
 add_connection xcvr1.tx_clk tx1_clk_bridge.in_clk
 
+add_connection xcvrA.avrx framerA.avrx
+
 add_connection xcvrA.line_td xcvr0.line_rd
 set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd endPort {}
 set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd endPortLSB {0}
@@ -337,6 +397,8 @@ add_connection xcvrA.rx_clk framerA.rx_clk
 add_connection xcvrA.tx_clk BtoA.out_clk
 
 add_connection xcvrA.tx_clk framerA.tx_clk
+
+add_connection xcvrB.avrx framerB.avrx
 
 add_connection xcvrB.line_td xcvr1.line_rd
 set_connection_parameter_value xcvrB.line_td/xcvr1.line_rd endPort {}
