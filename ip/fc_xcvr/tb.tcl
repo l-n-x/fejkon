@@ -67,20 +67,60 @@ set_instance_parameter_value phy0_clk {clockFrequency} {106255000.0}
 set_instance_parameter_value phy0_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phy0_clk {resetSynchronousEdges} {NONE}
 
+add_instance phy0_rst_br altera_reset_bridge 20.1
+set_instance_parameter_value phy0_rst_br {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value phy0_rst_br {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value phy0_rst_br {SYNCHRONOUS_EDGES} {deassert}
+set_instance_parameter_value phy0_rst_br {USE_RESET_REQUEST} {0}
+
+add_instance phy0_rst_src altera_avalon_reset_source 20.1
+set_instance_parameter_value phy0_rst_src {ASSERT_HIGH_RESET} {0}
+set_instance_parameter_value phy0_rst_src {INITIAL_RESET_CYCLES} {3000}
+
 add_instance phy1_clk clock_source 20.1
 set_instance_parameter_value phy1_clk {clockFrequency} {106253000.0}
 set_instance_parameter_value phy1_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phy1_clk {resetSynchronousEdges} {NONE}
+
+add_instance phy1_rst_br altera_reset_bridge 20.1
+set_instance_parameter_value phy1_rst_br {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value phy1_rst_br {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value phy1_rst_br {SYNCHRONOUS_EDGES} {deassert}
+set_instance_parameter_value phy1_rst_br {USE_RESET_REQUEST} {0}
+
+add_instance phy1_rst_src altera_avalon_reset_source 20.1
+set_instance_parameter_value phy1_rst_src {ASSERT_HIGH_RESET} {0}
+set_instance_parameter_value phy1_rst_src {INITIAL_RESET_CYCLES} {12000}
 
 add_instance phyA_clk clock_source 20.1
 set_instance_parameter_value phyA_clk {clockFrequency} {106247000.0}
 set_instance_parameter_value phyA_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phyA_clk {resetSynchronousEdges} {NONE}
 
+add_instance phyA_rst_br altera_reset_bridge 20.1
+set_instance_parameter_value phyA_rst_br {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value phyA_rst_br {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value phyA_rst_br {SYNCHRONOUS_EDGES} {deassert}
+set_instance_parameter_value phyA_rst_br {USE_RESET_REQUEST} {0}
+
+add_instance phyA_rst_src altera_avalon_reset_source 20.1
+set_instance_parameter_value phyA_rst_src {ASSERT_HIGH_RESET} {0}
+set_instance_parameter_value phyA_rst_src {INITIAL_RESET_CYCLES} {6000}
+
 add_instance phyB_clk clock_source 20.1
 set_instance_parameter_value phyB_clk {clockFrequency} {106245000.0}
 set_instance_parameter_value phyB_clk {clockFrequencyKnown} {1}
 set_instance_parameter_value phyB_clk {resetSynchronousEdges} {NONE}
+
+add_instance phyB_rst_br altera_reset_bridge 20.1
+set_instance_parameter_value phyB_rst_br {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value phyB_rst_br {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value phyB_rst_br {SYNCHRONOUS_EDGES} {deassert}
+set_instance_parameter_value phyB_rst_br {USE_RESET_REQUEST} {0}
+
+add_instance phyB_rst_src altera_avalon_reset_source 20.1
+set_instance_parameter_value phyB_rst_src {ASSERT_HIGH_RESET} {0}
+set_instance_parameter_value phyB_rst_src {INITIAL_RESET_CYCLES} {9000}
 
 add_instance reconfig alt_xcvr_reconfig 19.1
 set_instance_parameter_value reconfig {ber_en} {0}
@@ -136,20 +176,20 @@ add_interface mm avalon slave
 set_interface_property mm EXPORT_OF mm.s0
 add_interface phy0_clk clock sink
 set_interface_property phy0_clk EXPORT_OF phy0_clk.clk_in
-add_interface phy0_reset reset sink
-set_interface_property phy0_reset EXPORT_OF phy0_clk.clk_in_reset
+add_interface phy0_reset reset source
+set_interface_property phy0_reset EXPORT_OF phy0_rst_br.out_reset
 add_interface phy1_clk clock sink
 set_interface_property phy1_clk EXPORT_OF phy1_clk.clk_in
-add_interface phy1_reset reset sink
-set_interface_property phy1_reset EXPORT_OF phy1_clk.clk_in_reset
+add_interface phy1_reset reset source
+set_interface_property phy1_reset EXPORT_OF phy1_rst_br.out_reset
 add_interface phya_clk clock sink
 set_interface_property phya_clk EXPORT_OF phyA_clk.clk_in
-add_interface phya_reset reset sink
-set_interface_property phya_reset EXPORT_OF phyA_clk.clk_in_reset
+add_interface phya_reset reset source
+set_interface_property phya_reset EXPORT_OF phyA_rst_br.out_reset
 add_interface phyb_clk clock sink
 set_interface_property phyb_clk EXPORT_OF phyB_clk.clk_in
-add_interface phyb_reset reset sink
-set_interface_property phyb_reset EXPORT_OF phyB_clk.clk_in_reset
+add_interface phyb_reset reset source
+set_interface_property phyb_reset EXPORT_OF phyB_rst_br.out_reset
 add_interface reconfig_busy conduit end
 set_interface_property reconfig_busy EXPORT_OF reconfig.reconfig_busy
 add_interface reconfig_mgmt avalon slave
@@ -228,27 +268,11 @@ add_connection mgmt_clk.clk_reset BtoA.in_clk_reset
 
 add_connection mgmt_clk.clk_reset BtoA.out_clk_reset
 
-add_connection mgmt_clk.clk_reset framer0.reset
-
-add_connection mgmt_clk.clk_reset framer1.reset
-
-add_connection mgmt_clk.clk_reset framerA.reset
-
-add_connection mgmt_clk.clk_reset framerB.reset
-
 add_connection mgmt_clk.clk_reset mm.m0_reset
 
 add_connection mgmt_clk.clk_reset mm.s0_reset
 
 add_connection mgmt_clk.clk_reset reconfig.mgmt_rst_reset
-
-add_connection mgmt_clk.clk_reset xcvr0.reset
-
-add_connection mgmt_clk.clk_reset xcvr1.reset
-
-add_connection mgmt_clk.clk_reset xcvrA.reset
-
-add_connection mgmt_clk.clk_reset xcvrB.reset
 
 add_connection mm.m0 framer0.rx_mgmt_mm
 set_connection_parameter_value mm.m0/framer0.rx_mgmt_mm arbitrationPriority {1}
@@ -290,13 +314,61 @@ set_connection_parameter_value mm.m0/framerB.tx_mgmt_mm arbitrationPriority {1}
 set_connection_parameter_value mm.m0/framerB.tx_mgmt_mm baseAddress {0x00a0}
 set_connection_parameter_value mm.m0/framerB.tx_mgmt_mm defaultConnection {0}
 
+add_connection phy0_clk.clk phy0_rst_br.clk
+
+add_connection phy0_clk.clk phy0_rst_src.clk
+
 add_connection phy0_clk.clk xcvr0.phy_clk
+
+add_connection phy0_clk.clk_reset framer0.reset
+
+add_connection phy0_clk.clk_reset xcvr0.reset
+
+add_connection phy0_rst_src.reset phy0_clk.clk_in_reset
+
+add_connection phy0_rst_src.reset phy0_rst_br.in_reset
+
+add_connection phy1_clk.clk phy1_rst_br.clk
+
+add_connection phy1_clk.clk phy1_rst_src.clk
 
 add_connection phy1_clk.clk xcvr1.phy_clk
 
+add_connection phy1_clk.clk_reset framer1.reset
+
+add_connection phy1_clk.clk_reset phy1_rst_br.in_reset
+
+add_connection phy1_clk.clk_reset xcvr1.reset
+
+add_connection phy1_rst_src.reset phy1_clk.clk_in_reset
+
+add_connection phyA_clk.clk phyA_rst_br.clk
+
+add_connection phyA_clk.clk phyA_rst_src.clk
+
 add_connection phyA_clk.clk xcvrA.phy_clk
 
+add_connection phyA_clk.clk_reset framerA.reset
+
+add_connection phyA_clk.clk_reset phyA_rst_br.in_reset
+
+add_connection phyA_clk.clk_reset xcvrA.reset
+
+add_connection phyA_rst_src.reset phyA_clk.clk_in_reset
+
+add_connection phyB_clk.clk phyB_rst_br.clk
+
+add_connection phyB_clk.clk phyB_rst_src.clk
+
 add_connection phyB_clk.clk xcvrB.phy_clk
+
+add_connection phyB_clk.clk_reset framerB.reset
+
+add_connection phyB_clk.clk_reset phyB_rst_br.in_reset
+
+add_connection phyB_clk.clk_reset xcvrB.reset
+
+add_connection phyB_rst_src.reset phyB_clk.clk_in_reset
 
 add_connection reconfig.ch0_1_to_xcvr xcvr0.reconfig_to_xcvr
 set_connection_parameter_value reconfig.ch0_1_to_xcvr/xcvr0.reconfig_to_xcvr endPort {}

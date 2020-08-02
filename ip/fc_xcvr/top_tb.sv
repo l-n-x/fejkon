@@ -1,5 +1,9 @@
 `define MGMT_CLK tb.tb_inst_clk_bfm
 `define MGMT_RESET_N tb.tb_inst_reset_bfm
+`define PHY0_RESET_N tb.tb_inst.phy0_rst_src
+`define PHYA_RESET_N tb.tb_inst.phya_rst_src
+`define PHYB_RESET_N tb.tb_inst.phyb_rst_src
+`define PHY1_RESET_N tb.tb_inst.phy1_rst_src
 `define XCVR0 tb.tb_inst.xcvr0
 `define PHY0 tb.tb_inst.xcvr0.phy
 `define PHY1 tb.tb_inst.xcvr1.phy
@@ -48,7 +52,31 @@ module top_tb;
 
   initial begin
     wait(`MGMT_RESET_N.reset == 1);
-    $sformat(message, "%m: Reset released");
+    $sformat(message, "%m: Mgmt reset released");
+    print(VERBOSITY_INFO, message);
+  end
+
+  initial begin
+    wait(`PHY0_RESET_N.reset == 1);
+    $sformat(message, "%m: PHY0 reset released");
+    print(VERBOSITY_INFO, message);
+  end
+
+  initial begin
+    wait(`PHYA_RESET_N.reset == 1);
+    $sformat(message, "%m: PHYA reset released");
+    print(VERBOSITY_INFO, message);
+  end
+
+  initial begin
+    wait(`PHYB_RESET_N.reset == 1);
+    $sformat(message, "%m: PHYB reset released");
+    print(VERBOSITY_INFO, message);
+  end
+
+  initial begin
+    wait(`PHY1_RESET_N.reset == 1);
+    $sformat(message, "%m: PHY1 reset released");
     print(VERBOSITY_INFO, message);
   end
 
