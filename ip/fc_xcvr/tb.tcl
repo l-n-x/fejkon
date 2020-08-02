@@ -9,37 +9,41 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 # Instances and instance parameters
 # (disabled instances are intentionally culled)
-add_instance fifo_AtoB altera_avalon_dc_fifo 20.1
-set_instance_parameter_value fifo_AtoB {BITS_PER_SYMBOL} {9}
-set_instance_parameter_value fifo_AtoB {CHANNEL_WIDTH} {0}
-set_instance_parameter_value fifo_AtoB {ENABLE_EXPLICIT_MAXCHANNEL} {0}
-set_instance_parameter_value fifo_AtoB {ERROR_WIDTH} {0}
-set_instance_parameter_value fifo_AtoB {EXPLICIT_MAXCHANNEL} {0}
-set_instance_parameter_value fifo_AtoB {FIFO_DEPTH} {16}
-set_instance_parameter_value fifo_AtoB {RD_SYNC_DEPTH} {3}
-set_instance_parameter_value fifo_AtoB {SYMBOLS_PER_BEAT} {4}
-set_instance_parameter_value fifo_AtoB {USE_IN_FILL_LEVEL} {0}
-set_instance_parameter_value fifo_AtoB {USE_OUT_FILL_LEVEL} {0}
-set_instance_parameter_value fifo_AtoB {USE_PACKETS} {0}
-set_instance_parameter_value fifo_AtoB {WR_SYNC_DEPTH} {3}
+add_instance AtoB altera_avalon_dc_fifo 20.1
+set_instance_parameter_value AtoB {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value AtoB {CHANNEL_WIDTH} {0}
+set_instance_parameter_value AtoB {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value AtoB {ERROR_WIDTH} {0}
+set_instance_parameter_value AtoB {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value AtoB {FIFO_DEPTH} {128}
+set_instance_parameter_value AtoB {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value AtoB {SYMBOLS_PER_BEAT} {4}
+set_instance_parameter_value AtoB {USE_IN_FILL_LEVEL} {0}
+set_instance_parameter_value AtoB {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value AtoB {USE_PACKETS} {1}
+set_instance_parameter_value AtoB {WR_SYNC_DEPTH} {3}
 
-add_instance fifo_BtoA altera_avalon_dc_fifo 20.1
-set_instance_parameter_value fifo_BtoA {BITS_PER_SYMBOL} {9}
-set_instance_parameter_value fifo_BtoA {CHANNEL_WIDTH} {0}
-set_instance_parameter_value fifo_BtoA {ENABLE_EXPLICIT_MAXCHANNEL} {0}
-set_instance_parameter_value fifo_BtoA {ERROR_WIDTH} {0}
-set_instance_parameter_value fifo_BtoA {EXPLICIT_MAXCHANNEL} {0}
-set_instance_parameter_value fifo_BtoA {FIFO_DEPTH} {16}
-set_instance_parameter_value fifo_BtoA {RD_SYNC_DEPTH} {3}
-set_instance_parameter_value fifo_BtoA {SYMBOLS_PER_BEAT} {4}
-set_instance_parameter_value fifo_BtoA {USE_IN_FILL_LEVEL} {0}
-set_instance_parameter_value fifo_BtoA {USE_OUT_FILL_LEVEL} {0}
-set_instance_parameter_value fifo_BtoA {USE_PACKETS} {0}
-set_instance_parameter_value fifo_BtoA {WR_SYNC_DEPTH} {3}
+add_instance BtoA altera_avalon_dc_fifo 20.1
+set_instance_parameter_value BtoA {BITS_PER_SYMBOL} {8}
+set_instance_parameter_value BtoA {CHANNEL_WIDTH} {0}
+set_instance_parameter_value BtoA {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value BtoA {ERROR_WIDTH} {0}
+set_instance_parameter_value BtoA {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value BtoA {FIFO_DEPTH} {128}
+set_instance_parameter_value BtoA {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value BtoA {SYMBOLS_PER_BEAT} {4}
+set_instance_parameter_value BtoA {USE_IN_FILL_LEVEL} {0}
+set_instance_parameter_value BtoA {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value BtoA {USE_PACKETS} {1}
+set_instance_parameter_value BtoA {WR_SYNC_DEPTH} {3}
 
 add_instance framer0 fc_framer 1.0
 
 add_instance framer1 fc_framer 1.0
+
+add_instance framerA fc_framer 1.0
+
+add_instance framerB fc_framer 1.0
 
 add_instance mgmt_clk clock_source 20.1
 set_instance_parameter_value mgmt_clk {clockFrequency} {50000000.0}
@@ -120,6 +124,10 @@ add_interface framer1_rx_mgmt_mm avalon slave
 set_interface_property framer1_rx_mgmt_mm EXPORT_OF framer1.rx_mgmt_mm
 add_interface framer1_tx_mgmt_mm avalon slave
 set_interface_property framer1_tx_mgmt_mm EXPORT_OF framer1.tx_mgmt_mm
+add_interface framera_active conduit end
+set_interface_property framera_active EXPORT_OF framerA.active
+add_interface framerb_active conduit end
+set_interface_property framerb_active EXPORT_OF framerB.active
 add_interface phy0_clk clock sink
 set_interface_property phy0_clk EXPORT_OF phy0_clk.clk_in
 add_interface phy0_reset reset sink
@@ -176,13 +184,17 @@ add_interface xcvrb_mgmt_mm avalon slave
 set_interface_property xcvrb_mgmt_mm EXPORT_OF xcvrB.mgmt_mm
 
 # connections and connection parameters
-add_connection fifo_AtoB.out xcvrB.avtx
+add_connection AtoB.out framerB.usertx
 
-add_connection fifo_BtoA.out xcvrA.avtx
+add_connection BtoA.out framerA.usertx
 
 add_connection framer0.avtx xcvr0.avtx
 
 add_connection framer1.avtx xcvr1.avtx
+
+add_connection framerA.userrx AtoB.in
+
+add_connection framerB.userrx BtoA.in
 
 add_connection mgmt_clk.clk reconfig.mgmt_clk_clk
 
@@ -194,17 +206,21 @@ add_connection mgmt_clk.clk xcvrA.mgmt_clk
 
 add_connection mgmt_clk.clk xcvrB.mgmt_clk
 
-add_connection mgmt_clk.clk_reset fifo_AtoB.in_clk_reset
+add_connection mgmt_clk.clk_reset AtoB.in_clk_reset
 
-add_connection mgmt_clk.clk_reset fifo_AtoB.out_clk_reset
+add_connection mgmt_clk.clk_reset AtoB.out_clk_reset
 
-add_connection mgmt_clk.clk_reset fifo_BtoA.in_clk_reset
+add_connection mgmt_clk.clk_reset BtoA.in_clk_reset
 
-add_connection mgmt_clk.clk_reset fifo_BtoA.out_clk_reset
+add_connection mgmt_clk.clk_reset BtoA.out_clk_reset
 
 add_connection mgmt_clk.clk_reset framer0.reset
 
 add_connection mgmt_clk.clk_reset framer1.reset
+
+add_connection mgmt_clk.clk_reset framerA.reset
+
+add_connection mgmt_clk.clk_reset framerB.reset
 
 add_connection mgmt_clk.clk_reset reconfig.mgmt_rst_reset
 
@@ -307,8 +323,6 @@ add_connection xcvr1.tx_clk framer1.tx_clk
 
 add_connection xcvr1.tx_clk tx1_clk_bridge.in_clk
 
-add_connection xcvrA.avrx fifo_AtoB.in
-
 add_connection xcvrA.line_td xcvr0.line_rd
 set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd endPort {}
 set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd endPortLSB {0}
@@ -316,11 +330,13 @@ set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd startPort {}
 set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd startPortLSB {0}
 set_connection_parameter_value xcvrA.line_td/xcvr0.line_rd width {0}
 
-add_connection xcvrA.rx_clk fifo_AtoB.in_clk
+add_connection xcvrA.rx_clk AtoB.in_clk
 
-add_connection xcvrA.tx_clk fifo_BtoA.out_clk
+add_connection xcvrA.rx_clk framerA.rx_clk
 
-add_connection xcvrB.avrx fifo_BtoA.in
+add_connection xcvrA.tx_clk BtoA.out_clk
+
+add_connection xcvrA.tx_clk framerA.tx_clk
 
 add_connection xcvrB.line_td xcvr1.line_rd
 set_connection_parameter_value xcvrB.line_td/xcvr1.line_rd endPort {}
@@ -336,9 +352,13 @@ set_connection_parameter_value xcvrB.reconfig_from_xcvr/reconfig.ch4_5_from_xcvr
 set_connection_parameter_value xcvrB.reconfig_from_xcvr/reconfig.ch4_5_from_xcvr startPortLSB {0}
 set_connection_parameter_value xcvrB.reconfig_from_xcvr/reconfig.ch4_5_from_xcvr width {0}
 
-add_connection xcvrB.rx_clk fifo_BtoA.in_clk
+add_connection xcvrB.rx_clk BtoA.in_clk
 
-add_connection xcvrB.tx_clk fifo_AtoB.out_clk
+add_connection xcvrB.rx_clk framerB.rx_clk
+
+add_connection xcvrB.tx_clk AtoB.out_clk
+
+add_connection xcvrB.tx_clk framerB.tx_clk
 
 # interconnect requirements
 set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
